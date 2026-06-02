@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import type { ReactElement } from "react";
+import { Suspense, type ReactElement } from "react";
 
-import { ArticleCard } from "@/components/domain/ArticleCard";
+import { CategoryArticles } from "@/components/domain/CategoryArticles";
 import { HeroArticle } from "@/components/domain/HeroArticle";
 import {
   Card,
@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { JsonLd } from "@/components/ui/json-ld";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getArticleRepository } from "@/infrastructure/article-repository";
 import { organizationJsonLd, websiteJsonLd } from "@/lib/seo";
 
@@ -17,9 +18,37 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
-export default async function HomePage(): Promise<ReactElement> {
+interface HomePageProps {
+  searchParams: Promise<{ category?: string | string[] }>;
+}
+
+function CategorySkeleton(): ReactElement {
+  return (
+    <div>
+      <div className="mt-4 flex flex-wrap gap-2">
+        {Array.from({ length: 5 }).map((_, index) => (
+          <Skeleton key={index} className="h-8 w-24 rounded-full" />
+        ))}
+      </div>
+      <div className="mt-6 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div key={index} className="space-y-3">
+            <Skeleton className="aspect-video w-full rounded-xl" />
+            <Skeleton className="h-3 w-24" />
+            <Skeleton className="h-5 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default async function HomePage({
+  searchParams,
+}: HomePageProps): Promise<ReactElement> {
   const articles = await getArticleRepository().getArticles();
-  const [hero, ...rest] = articles;
+  const hero = articles[0];
 
   return (
     <>
@@ -53,21 +82,17 @@ export default async function HomePage(): Promise<ReactElement> {
               </div>
             ) : null}
 
-            {rest.length > 0 ? (
-              <section className="mt-12" aria-labelledby="latest-heading">
-                <h2
-                  id="latest-heading"
-                  className="font-heading text-2xl font-bold tracking-tight"
-                >
-                  Derniers articles
-                </h2>
-                <div className="mt-6 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-                  {rest.map((article) => (
-                    <ArticleCard key={article.slug} article={article} />
-                  ))}
-                </div>
-              </section>
-            ) : null}
+            <section className="mt-12" aria-labelledby="latest-heading">
+              <h2
+                id="latest-heading"
+                className="font-heading text-2xl font-bold tracking-tight"
+              >
+                Derniers articles
+              </h2>
+              <Suspense fallback={<CategorySkeleton />}>
+                <CategoryArticles searchParams={searchParams} />
+              </Suspense>
+            </section>
           </>
         )}
       </div>
