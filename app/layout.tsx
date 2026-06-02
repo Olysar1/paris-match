@@ -1,44 +1,73 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { Geist_Mono, Inter, Playfair_Display } from "next/font/google";
+import type { ReactElement, ReactNode } from "react";
+
 import "./globals.css";
+import { SiteFooter } from "@/components/domain/SiteFooter";
+import { SiteHeader } from "@/components/domain/SiteHeader";
 import { cn } from "@/lib/utils";
+import { siteConfig } from "@/lib/site";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const playfairDisplay = Playfair_Display({
   subsets: ["latin"],
+  variable: "--font-heading",
+  weight: ["600", "700", "800"],
 });
 
 export const metadata: Metadata = {
-  title: "Paris Match",
-  description:
-    "Paris Match - Your ultimate destination for the latest news and updates.",
+  metadataBase: new URL(siteConfig.url),
+  title: {
+    default: `${siteConfig.name} — L’actualité internationale en images`,
+    template: `%s — ${siteConfig.name}`,
+  },
+  description: siteConfig.description,
+  applicationName: siteConfig.name,
+  openGraph: {
+    type: "website",
+    siteName: siteConfig.name,
+    title: siteConfig.name,
+    description: siteConfig.description,
+    url: siteConfig.url,
+    locale: siteConfig.locale,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteConfig.name,
+    description: siteConfig.description,
+  },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: ReactNode }>): ReactElement {
   return (
     <html
-      lang="en"
+      lang="fr"
       className={cn(
-        "h-full",
-        "antialiased",
-        geistSans.variable,
-        geistMono.variable,
-        "font-sans",
+        "h-full font-sans antialiased",
         inter.variable,
+        geistMono.variable,
+        playfairDisplay.variable,
       )}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        <a
+          href="#main-content"
+          className="sr-only rounded-md focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:not-sr-only focus:bg-brand focus:px-4 focus:py-2 focus:font-medium focus:text-brand-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+        >
+          Aller au contenu principal
+        </a>
+        <SiteHeader />
+        <main id="main-content" className="flex-1">
+          {children}
+        </main>
+        <SiteFooter />
+      </body>
     </html>
   );
 }
