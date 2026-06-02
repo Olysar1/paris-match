@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist_Mono, Inter, Playfair_Display } from "next/font/google";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import type { ReactElement, ReactNode } from "react";
 
 import "./globals.css";
@@ -62,11 +63,13 @@ export default function RootLayout({
         >
           Aller au contenu principal
         </a>
-        <SiteHeader />
-        <main id="main-content" className="flex-1">
-          {children}
-        </main>
-        <SiteFooter />
+        <NuqsAdapter>
+          <SiteHeader />
+          <main id="main-content" className="flex-1">
+            {children}
+          </main>
+          <SiteFooter />
+        </NuqsAdapter>
       </body>
     </html>
   );
